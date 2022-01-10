@@ -1,14 +1,7 @@
-,Unnamed: 0,Unnamed: 0.1,Unnamed: 0.1.1,product_name,composition,img_path
-0,,,,gucci,"['leather:100g', 'precious_skin:100g']",data/img/placeholder.png
-1,1.0,1.0,1.0,,,
-2,2.0,2.0,2.0,,,
-3,3.0,3.0,3.0,,,
-4,4.0,4.0,4.0,Product #4,[],data/img/placeholder.png
-5,5.0,5.0,,,,
-6,6.0,6.0,6.0,,,
-7,7.0,7.0,7.0,Product #7,[],data/img/placeholder.png
-8,8.0,8.0,8.0,Product #8,[],data/img/placeholder.png
-9,9.0,9.0,9.0,,,
-10,10.0,10.0,10.0,Product #10,,data/img/placeholder.png
-11,11.0,11.0,11.0,,,
-12,12.0,12.0,12.0,,,
+id,product_name,composition,img_path
+0,gucci,"['leather:100g', 'wood:100g']",data/img/cropped-cropped-logo-2.png
+1,Product #1,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
+2,Product #2,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
+3,Product #3,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
+4,Product #4,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
+5,Product #5,['leather:100g'],data/img/placeholder.png

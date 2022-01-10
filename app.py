@@ -1,6 +1,7 @@
 from numpy.core.fromnumeric import prod, product
 import streamlit as st
 import pandas as pd
+import numpy as np
 import re
 import ast
 from loguru import logger
@@ -10,7 +11,7 @@ from collections import defaultdict
 from PIL import Image
 
 
-@st.cache
+@st.cache()
 def load_df() -> Union[pd.DataFrame, List]:
     df_ekpi_perkg = pd.read_csv("data/material-quantity-in-2019-and-2020.csv", sep=";")
     df_ekpi_perkg["value_per_kg"] = (
@@ -75,84 +76,85 @@ df_ekpi_perkg, material_suggestions = load_df()
 
 def load_product_df():
     product_df = pd.read_csv("data/products.csv")
-    product_df = product_df[["product_name", "composition", "img_path"]]
+    product_df = product_df[["id", "product_name", "composition", "img_path"]]
+    product_df["id"] = product_df["id"].astype(int)
     product_list = product_df["product_name"].to_list()
     logger.info(product_df)
     return product_df, product_list
 
 
-st.sidebar.markdown("# Compute environmental cost of an existing product")
 product_df, product_list = load_product_df()
 current_product_name = st.sidebar.selectbox("Select product", product_list)
 
 
 def add_product():
     product_df = pd.read_csv("data/products.csv")
-    max_i = product_df.index.max() + 1
+    max_id = product_df["id"].astype(int).max() + 1
+    logger.debug(f"max_id: {max_id}")
     test_df = pd.DataFrame(
         {
-            "product_name": [f"Product #{max_i}"],
+            "id": [max_id],
+            "product_name": [f"Product #{max_id}"],
             "composition": [None],
-            "img_path": "data/img/placeholder.png",
+            "img_path": ["data/img/placeholder.png"],
         }
     )
-    logger.info("Add product")
-    product_df = product_df.append(test_df).reset_index()
-    product_df.to_csv("data/products.csv")
+    logger.info(f"Add product: {test_df}")
+    logger.debug(f"product_df columns: {product_df.columns}")
+    logger.debug(f"test_df columns: {test_df.columns}")
+    product_df = product_df.append(test_df, ignore_index=True)
+    product_df["id"] = product_df["id"].astype(int)
+    product_df.to_csv("data/products.csv", index=False)
 
 
-new_product_create = st.sidebar.button(
-    "Create new product",
-    on_click=add_product,
-)
-
-current_product = product_df[product_df["product_name"] == current_product_name]
-logger.info(current_product)
-current_product_index, current_product = (
-    current_product.index,
-    current_product.iloc[0],
-)
-
-
-@st.cache
+@st.cache()
 def load_image(image_file):
     img = Image.open(image_file)
     return img
 
 
 def save_product(
-    index: int,
+    product_id: int,
     product_name: str,
     composition: List[str],
     img_path,
     uploadedfile,
 ):
     product_df = pd.read_csv("data/products.csv")
+    logger.debug(f"product_id: {product_id}")
     if uploadedfile:
         img_path = f"data/img/{uploadedfile.name}"
         with open(img_path, "wb") as f:
             f.write(uploadedfile.getbuffer())
-    new_product_line = pd.DataFrame(
-        {
-            "product_name": [product_name],
-            "composition": [composition],
-            "img_path": [img_path],
-        }
-    )
-    product_df.iloc[index] = new_product_line
-    logger.info("Index:")
-    logger.info(product_df.iloc[index])
-    logger.info("Product")
-    logger.info(new_product_line)
-    product_df.to_csv("data/products.csv")
+    if pd.isna(composition).any():
+        composition = []
+    logger.info(f"before: {product_df[product_df['id'] == product_id]}")
+    product_df.loc[product_df["id"] == product_id, "product_name"] = product_name
+    product_df.loc[product_df["id"] == product_id, "composition"] = str(composition)
+    product_df.loc[product_df["id"] == product_id, "img_path"] = img_path
+
+    logger.info(f"after: {product_df[product_df['id'] == product_id]}")
+    product_df["id"] = product_df["id"].astype(int)
+    product_df.to_csv("data/products.csv", index=False)
     return product_df
 
 
 st.markdown("# Compute the product's environmental cost")
+
+current_product = product_df[product_df["product_name"] == current_product_name]
+logger.info(current_product)
+current_product = current_product.iloc[0]
+logger.debug(f"current_product: {current_product}")
+
 if isinstance(current_product["composition"], str):
-    current_product["composition"] = ast.literal_eval(current_product["composition"])
+    if current_product["composition"] != "":
+        current_product["composition"] = ast.literal_eval(
+            current_product["composition"]
+        )
 else:
-    current_product["composition"] = None
+    current_product["composition"] = []
+if current_product["composition"] == pd.NA:
+    current_product["composition"] = []
 col1, col2 = st.columns(2)
 with col1:
     product_name = st.text_input("Product name", value=current_product["product_name"])
@@ -168,13 +170,15 @@ with col2:
         f"""## Environmental cost: \
         {compute_environmental_cost(composition, df_ekpi_perkg)}$"""
     )
-product_df = save_product(
-    current_product_index,
-    product_name,
-    composition,
-    current_product["img_path"],
-    uploadedfile,
-)
+
+    if st.button("Save changes"):
+        save_product(
+            current_product["id"],
+            product_name,
+            composition,
+            current_product["img_path"],
+            uploadedfile,
+        )
 
 # Add : picture of the product (if available)
 # Add : histogram of index score
