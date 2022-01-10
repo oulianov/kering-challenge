@@ -107,6 +107,9 @@ def add_product():
     product_df.to_csv("data/products.csv", index=False)
 
 
+st.sidebar.button("Create new product", on_click=add_product)
+
+
 @st.cache()
 def load_image(image_file):
     img = Image.open(image_file)

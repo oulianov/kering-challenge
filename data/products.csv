@@ -5,3 +5,4 @@ id,product_name,composition,img_path
 3,Product #3,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
 4,Product #4,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
 5,Product #5,['leather:100g'],data/img/placeholder.png
+6,Gucci bag,"['leather:100g', 'metal:1000g']",data/img/placeholder.png
