@@ -1,2 +1,8 @@
 streamlit
 streamlit_tags
+loguru
+typing
+PIL
+re
+collections
+pandas
