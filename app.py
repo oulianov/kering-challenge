@@ -84,6 +84,7 @@ def load_product_df():
 
 
 product_df, product_list = load_product_df()
+st.sidebar.markdown("### Compute the environmental cost of a product")
 current_product_name = st.sidebar.selectbox("Select product", product_list)
 
 
@@ -142,8 +143,6 @@ def save_product(
     return product_df
 
 
-st.markdown("# Compute the product's environmental cost")
-
 current_product = product_df[product_df["product_name"] == current_product_name]
 logger.info(current_product)
 current_product = current_product.iloc[0]
@@ -168,6 +167,9 @@ with col2:
         label="Composition (Material:Weight)",
         value=current_product["composition"],
         suggestions=material_suggestions,
+    )
+    st.markdown(
+        f"Allowed materials: `{', '.join(df_ekpi_perkg['material_slug'].to_list())}`"
     )
     st.markdown(
         f"""## Environmental cost: \
