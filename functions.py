@@ -83,7 +83,7 @@ def add_product():
             "id": [max_id],
             "product_name": [f"Product #{max_id}"],
             "composition": [None],
-            "img_path": ["data/img/placeholder.png"],
+            "img_path": ["data/img/nico1.png"],
         }
     )
     logger.info(f"Add product: {test_df}")
