@@ -44,20 +44,21 @@ with col2:
     st.markdown(
         f"Allowed materials: `{', '.join(df_ekpi_perkg['material_slug'].to_list())}`"
     )
-    env_cost, env_group_to_impact = compute_environmental_cost(
-        composition, df_ekpi_perkg, df_material_ekpi_agg
-    )
-    st.markdown(
-        f"""## Environmental cost: \
-        {env_cost:.0f}$\
-        \nAir emissions: {env_group_to_impact["Air emissions"]*1000:.0f} g\
-        \nGHGs: {env_group_to_impact["GHGs"]:.2f} kg CO2e\
-        \nLand use: {env_group_to_impact["Land use"]*10000:.0f} m²\
-        \nWaste: {env_group_to_impact["Waste"]*1000:.0f} g\
-        \nWater consumption: {env_group_to_impact["Water consumption"]*1000:.0f} L\
-        \nWater pollution: {env_group_to_impact["Water pollution"]*1000:.0f} L\
-        """
-    )
+    if composition:
+        env_cost, env_group_to_impact = compute_environmental_cost(
+            composition, df_ekpi_perkg, df_material_ekpi_agg
+        )
+        st.markdown(
+            f"""## Environmental cost: \
+            {env_cost:.0f}$\
+            \nAir emissions: {env_group_to_impact["Air emissions"]*1000:.0f} g\
+            \nGHGs: {env_group_to_impact["GHGs"]:.2f} kg CO2e\
+            \nLand use: {env_group_to_impact["Land use"]*10000:.0f} m²\
+            \nWaste: {env_group_to_impact["Waste"]*1000:.0f} g\
+            \nWater consumption: {env_group_to_impact["Water consumption"]*1000:.0f} L\
+            \nWater pollution: {env_group_to_impact["Water pollution"]*1000:.0f} L\
+            """
+        )
 
     if st.button("Save changes"):
         save_product(
