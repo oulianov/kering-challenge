@@ -1,7 +1,6 @@
 id,product_name,composition,img_path
-1,Bambou bag,"['leather:700g', 'wood:100g', 'metal:100g']",data/img/nico1.jpg
-2,Leather vest,"['leather:1000g']",data/img/nico2.jpg
-3,White heels,"['Rubber:500g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
-4,White bag,"['leather:200g', 'Animal fiber:100g', 'metal:200g']",data/img/nico4.jpg
-5,Necklace,"['Natural Stone:30g', 'Metal:100g']",data/img/nico5.jpg
-
+1,Bambou bag,"['leather:300g', 'wood:40g', 'metal:40g']",data/img/nico1.png
+2,Jacket,"['synthetic_fibers:800g']",data/img/nico2.png
+3,White heels,"['rubber:220g', 'wood:80g', 'metal:50g']",data/img/nico3.png
+4,White bag,"['leather:200g', 'animal_fibers:100g', 'metal:40g']",data/img/nico4.png
+5,Necklace,"['natural_stones:2g', 'metal:10g']",data/img/nico5.png

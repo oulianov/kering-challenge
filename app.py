@@ -30,7 +30,9 @@ col1, col2 = st.columns(2)
 
 with col1:
     product_name = st.text_input("Product name", value=current_product["product_name"])
-    st.image(load_image(current_product["img_path"]), width=250)
+    st.image(
+        load_image(current_product["img_path"]),
+    )
     uploadedfile = st.file_uploader("Upload product picture", type=["jpg", "png"])
 
 with col2:
