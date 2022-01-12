@@ -3,26 +3,65 @@ import pandas as pd
 import re
 
 from loguru import logger
-from typing import Union, List
+from typing import Dict, Tuple, List
 from collections import defaultdict
 from PIL import Image
 
 
 @st.cache()
-def load_df() -> Union[pd.DataFrame, List]:
+def load_df() -> Tuple[pd.DataFrame, pd.DataFrame, List]:
+    # Load df impact by environmental area and raw material
+    df_material_ekpi = pd.read_csv("data/raw-material-intensities-2020.csv", sep=";")
+    df_material_ekpi_agg = (
+        df_material_ekpi.groupby(["Material Group", "Environmentalimpactgroup"])
+        .sum()
+        .reset_index()
+    )
+    df_material_ekpi_agg.rename(
+        {
+            "Material Group": "material_group",
+            "Environmentalimpactgroup": "env_impact_group",
+        },
+        axis=1,
+        inplace=True,
+    )
+    df_material_agg_mat = (
+        df_material_ekpi_agg.groupby("material_group")
+        .sum()
+        .reset_index()[["material_group", "Valued_Ekpi_intensity"]]
+        .rename({"Valued_Ekpi_intensity": "underestimated_value"}, axis=1)
+    )
+    # Load raw material quantity
     df_ekpi_perkg = pd.read_csv("data/material-quantity-in-2019-and-2020.csv", sep=";")
+    logger.debug(df_ekpi_perkg.columns)
+    df_ekpi_perkg.rename(
+        {"Material group (exclude unspecified)": "material_group"}, axis=1, inplace=True
+    )
     df_ekpi_perkg["value_per_kg"] = (
         df_ekpi_perkg["Valued result"] / df_ekpi_perkg["Quantity_kg"]
     )
     df_ekpi_perkg["material_slug"] = (
-        df_ekpi_perkg["Material group (exclude unspecified)"]
-        .str.lower()
-        .str.replace(" ", "_")
+        df_ekpi_perkg["material_group"].str.lower().str.replace(" ", "_")
     )
+    # Join
+    df_material_ekpi_agg = df_material_ekpi_agg.merge(
+        df_ekpi_perkg, on="material_group"
+    ).merge(df_material_agg_mat, on="material_group")
+    df_material_ekpi_agg["underestimate_coeff"] = (
+        df_material_ekpi_agg["Valued result"]
+        / df_material_ekpi_agg["underestimated_value"]
+    )
+    df_material_ekpi_agg["env_impact_per_kg"] = (
+        df_material_ekpi_agg["Material_ePKI_intensity"]
+        / df_material_ekpi_agg["Quantity_kg"]
+        * df_material_ekpi_agg["underestimate_coeff"]
+    )
+    df_material_ekpi_agg
+    # Create raw material suggestion
     material_suggestions = (
         df_ekpi_perkg["material_slug"].apply(lambda x: x + ":100g").to_list()
     )
-    return df_ekpi_perkg, material_suggestions
+    return df_ekpi_perkg, df_material_ekpi_agg, material_suggestions
 
 
 def load_product_df():
@@ -33,7 +72,10 @@ def load_product_df():
     return product_df, product_list
 
 
-def compute_environmental_cost(composition: List[str], df_ekpi_perkg: pd.DataFrame):
+@st.cache()
+def compute_environmental_cost(
+    composition: List[str], df_ekpi_perkg: pd.DataFrame, df_material_ekpi: pd.DataFrame
+) -> Tuple[int, Dict[str, float]]:
     if not composition:
         return 0
     processed_comp = defaultdict(list)
@@ -61,18 +103,38 @@ def compute_environmental_cost(composition: List[str], df_ekpi_perkg: pd.DataFra
     if not processed_comp:
         return 0
     processed_comp = pd.DataFrame(processed_comp)
-    processed_comp = processed_comp.merge(
+    logger.debug(processed_comp)
+    # Environmental cost
+    processed_comp_env_cost = processed_comp.merge(
         df_ekpi_perkg,
         left_on="material_name",
         right_on="material_slug",
     )
-    processed_comp["value_for_material"] = (
-        processed_comp["weight"] * processed_comp["value_per_kg"]
+    processed_comp_env_cost["value_for_material"] = (
+        processed_comp_env_cost["weight"] * processed_comp_env_cost["value_per_kg"]
     )
-    environmental_cost = processed_comp["value_for_material"].sum()
-    # Formating
-    environmental_cost = int(environmental_cost * 100)
-    return environmental_cost
+    environmental_cost = processed_comp_env_cost["value_for_material"].sum()
+    # Multiply by 100 (constant)
+    environmental_cost = environmental_cost * 100
+    # Cost by environmental impact
+    processed_comp_env_impact = processed_comp.merge(
+        df_material_ekpi, left_on="material_name", right_on="material_slug"
+    )
+    processed_comp_env_impact["env_impact_for_material"] = (
+        processed_comp_env_impact["weight"]
+        * processed_comp_env_impact["env_impact_per_kg"]
+    )
+    processed_comp_env_impact = (
+        processed_comp_env_impact.groupby("env_impact_group").sum().reset_index()
+    )
+    env_group_to_impact = {
+        material: env_impact
+        for (material, env_impact) in zip(
+            processed_comp_env_impact["env_impact_group"],
+            processed_comp_env_impact["env_impact_for_material"],
+        )
+    }
+    return environmental_cost, env_group_to_impact
 
 
 def add_product():
