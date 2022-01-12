@@ -71,7 +71,7 @@ def compute_environmental_cost(composition: List[str], df_ekpi_perkg: pd.DataFra
     )
     environmental_cost = processed_comp["value_for_material"].sum()
     # Formating
-    environmental_cost = round(environmental_cost, 2)
+    environmental_cost = int(environmental_cost * 100)
     return environmental_cost
 
 
