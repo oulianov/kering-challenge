@@ -1,8 +1,7 @@
 id,product_name,composition,img_path
-0,gucci,"['leather:100g', 'wood:100g']",data/img/cropped-cropped-logo-2.png
-1,Product #1,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
-2,Product #2,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
-3,Product #3,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
-4,Product #4,"['leather:100g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
-5,Product #5,['leather:100g'],data/img/placeholder.png
-6,Gucci bag,"['leather:100g', 'metal:1000g']",data/img/placeholder.png
+1,Bambou bag,"['leather:700g', 'wood:100g', 'metal:100g']",data/img/nico1.jpg
+2,Leather vest,"['leather:1000g']",data/img/nico2.jpg
+3,White heels,"['Rubber:500g', 'wood:100g', 'metal:200g']",data/img/nico3.jpg
+4,White bag,"['leather:200g', 'Animal fiber:100g', 'metal:200g']",data/img/nico4.jpg
+5,Necklace,"['Natural Stone:30g', 'Metal:100g']",data/img/nico5.jpg
+
